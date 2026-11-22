@@ -1,0 +1,54 @@
+name: Release build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: x86_64-unknown-linux-musl
+          - runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+    env:
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build static executable
+        env:
+          RUSTFLAGS: -C linker=rust-lld -C link-self-contained=yes -C target-feature=+crt-static
+        run: |
+          rustup toolchain install stable --profile minimal --component rust-docs --target "$TARGET"
+          host_libdir=$(rustc +stable --print target-libdir)
+          export PATH="$host_libdir/../bin:$PATH"
+          cargo +stable test --release --locked --target "$TARGET"
+          cargo +stable build --release --locked --target "$TARGET"
+      - name: Verify and package
+        run: |
+          binary="target/$TARGET/release/zest"
+          headers=$(readelf -l -d "$binary")
+          if [[ "$headers" == *INTERP* || "$headers" == *NEEDED* ]]; then
+            echo 'Expected a statically linked executable.' >&2
+            exit 1
+          fi
+          "$binary" --version
+          bash contrib/release/package.sh "$binary" "$TARGET" dist
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: zest-${{ matrix.target }}
+          path: |
+            dist/*.tar.gz
+            dist/SHA256SUMS
+          if-no-files-found: error

@@ -1,0 +1,54 @@
+[Unit]
+Description=Zest Linux telemetry dashboard
+StartLimitIntervalSec=0
+
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/zest
+Environment=ZEST_LOCK_MEMORY=1
+EnvironmentFile=-/etc/zest/zest.env
+Restart=always
+RestartSec=10s
+TimeoutStopSec=5s
+
+DynamicUser=yes
+# Read process metrics across users, including protected /proc entries.
+CapabilityBoundingSet=CAP_SYS_PTRACE CAP_DAC_READ_SEARCH
+AmbientCapabilities=CAP_SYS_PTRACE CAP_DAC_READ_SEARCH
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadOnlyPaths=/
+InaccessiblePaths=/tmp /var/tmp /dev/shm -/etc/ssh
+ProtectHome=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service mlockall
+SystemCallFilter=~@mount @reboot @swap @raw-io @debug
+SystemCallErrorNumber=EPERM
+
+MemoryAccounting=yes
+MemoryMax=64M
+MemorySwapMax=0
+TasksMax=8
+LimitNOFILE=128
+LimitMEMLOCK=64M
+LimitAS=64M
+LimitCORE=0
+UMask=0077
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

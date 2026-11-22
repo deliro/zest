@@ -1,0 +1,7 @@
+/target/
+/dist/
+/.env
+/.env.*
+zest.env
+*.tar.gz
+.DS_Store

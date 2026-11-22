@@ -1,0 +1,5 @@
+htmx.min.js: htmx 2.0.10, Zero-Clause BSD
+SHA256: 4b2fd977b3ae23ae06329f0168486647c60413405200c0a10fb5e6f8d3700998
+With trailing newline removed: 71ea67185bfa8c98c39d31717c6fce5d852370fcdfd129db4543774d3145c0de
+Upstream: https://raw.githubusercontent.com/bigskysoftware/htmx/v2.0.10/dist/htmx.min.js
+Version identifier and syntax checked locally; upstream license checked online.
